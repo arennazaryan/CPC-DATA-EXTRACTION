@@ -25,11 +25,23 @@ ICONS = {
 def set_language(lang_code):
     if lang_code in ['en', 'hy']:
         session['lang'] = lang_code
-    return redirect(request.referrer or url_for('home.home'))
+    # Redirect to referrer or default to landing page
+    return redirect(request.referrer or url_for('home.index'))
 
 
 @home_bp.route("/")
-def home():
+def index():
+    """
+    New Landing/Greeting Page.
+    """
+    return render_template("landing.html")
+
+
+@home_bp.route("/tool")
+def tool():
+    """
+    The main extraction tool page (formerly home).
+    """
     context = {
         "rows_dict": rows_dict,
         "declarant_types": DECLARANT_TYPES,
@@ -55,18 +67,15 @@ def get_captcha_puzzle():
     target_name = TRANSLATIONS.get(lang, {}).get(target_key, "Icon")
 
     # 3. Generate Grid (3x3 = 9 items)
-    # Ensure at least 2 and max 4 correct items exist
     num_correct = random.randint(2, 4)
     grid_items = [target_class] * num_correct
-
-    # Fill the rest with distractors
     distractors = [v for k, v in ICONS.items() if k != target_key]
+
     while len(grid_items) < 9:
         grid_items.append(random.choice(distractors))
 
     random.shuffle(grid_items)
 
-    # 4. Calculate correct indices for verification
     correct_indices = [i for i, x in enumerate(grid_items) if x == target_class]
     session['captcha_solution'] = sorted(correct_indices)
 
@@ -84,16 +93,13 @@ def start_process():
             return jsonify({"error": "No JSON data received"}), 400
 
         # --- ICON CAPTCHA CHECK ---
-        user_selection = raw.get("captcha_selection", [])  # List of indices [0, 4, 8]
+        user_selection = raw.get("captcha_selection", [])
         real_solution = session.get("captcha_solution")
         session.pop("captcha_solution", None)  # One-time use
 
-        # Validate
         if not real_solution or not user_selection:
             return jsonify({"error": "CAPTCHA_FAIL"}), 400
 
-        # Ensure user selected exactly the correct set
-        # Sort both to compare
         user_selection = sorted([int(x) for x in user_selection])
 
         if user_selection != real_solution:
