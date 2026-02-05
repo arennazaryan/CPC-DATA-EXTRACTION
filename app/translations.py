@@ -1,11 +1,41 @@
 TRANSLATIONS = {
     "en": {
-        # ... (Keep existing translations) ...
-        "security_check": "SECURITY CHECK",
-        "captcha_prompt": "Select all icons of:",  # UPDATED
-        "error_captcha": "Incorrect selection. Please try again.",  # UPDATED
+        # --- LANDING PAGE ---
+        "nav_home": "Home",
+        "nav_tool": "Tool",
+        "hero_title": "CPC Data Extraction Portal",
+        "hero_desc": "A specialized tool to automatically extract public asset and income declarations from the Corruption Prevention Commission registry.",
+        "cta_start": "Start Extracting",
+        "landing_note_data_lang": "Note: The source data is strictly in Armenian. Extracted files will contain Armenian text regardless of the interface language.",
 
-        # OBJECT NAMES FOR CAPTCHA
+        "cpc_transparency_title": "Source Transparency",
+        "cpc_attribution": "This tool utilizes the public API provided by the Corruption Prevention Commission of Armenia.",
+        "cpc_website": "CPC Official Website",
+        "api_docs": "API Documentation",
+
+        "creator_credit": "Built by a Data Journalist for all bright minds.",
+
+        "feat_target_title": "Targeted Extraction",
+        "feat_target_desc": "Select specific data points like 'Real Estate' or 'Income' to extract exactly what you need.",
+        "feat_auto_title": "Automated Collection",
+        "feat_auto_desc": "Bypass manual retrieval. Our tool handles pagination and data aggregation automatically.",
+        "feat_export_title": "Export Ready",
+        "feat_export_desc": "Download your extracted datasets immediately in CSV format.",
+
+        "how_works_title": "How It Works",
+        "step_1_title": "Select Data",
+        "step_1_desc": "Choose the data row (e.g., Cash) and year.",
+        "step_2_title": "Verify",
+        "step_2_desc": "Solve a quick visual puzzle to confirm you are human.",
+        "step_3_title": "Extract",
+        "step_3_desc": "The system retrieves the data via the API.",
+        "step_4_title": "Download",
+        "step_4_desc": "Get your dataset in a single file.",
+
+        # --- EXISTING TRANSLATIONS ---
+        "security_check": "SECURITY CHECK",
+        "captcha_prompt": "Select all icons of:",
+        "error_captcha": "Incorrect selection. Please try again.",
         "icon_car": "Car",
         "icon_tree": "Tree",
         "icon_user": "Person",
@@ -15,8 +45,6 @@ TRANSLATIONS = {
         "icon_plane": "Plane",
         "icon_star": "Star",
         "icon_heart": "Heart",
-
-        # ... (Keep the rest) ...
         "nav_title": "CPC Data Portal",
         "nav_history": "History",
         "header_title": "Automated export of Corruption Prevention Commission registry data",
@@ -70,12 +98,42 @@ TRANSLATIONS = {
         "btn_results": "View"
     },
     "hy": {
-        # ... (Keep existing translations) ...
-        "security_check": "ԱՆՎՏԱՆԳՈՒԹՅԱՆ ՍՏՈՒԳՈՒՄ",
-        "captcha_prompt": "Ընտրեք բոլոր նշանները՝",  # UPDATED
-        "error_captcha": "Սխալ ընտրություն: Փորձեք կրկին:",  # UPDATED
+        # --- LANDING PAGE ---
+        "nav_home": "Գլխավոր",
+        "nav_tool": "Գործիք",
+        "hero_title": "ԿԿՀ Տվյալների Արտահանման Պորտալ",
+        "hero_desc": "Մասնագիտացված գործիք՝ Կոռուպցիայի կանխարգելման հանձնաժողովի ռեեստրից հայտարարագրերի ավտոմատ արտահանման համար:",
+        "cta_start": "Սկսել Արտահանումը",
+        "landing_note_data_lang": "Նշում. աղբյուրի տվյալները հասանելի են միայն հայերենով: Արտահանված ֆայլերը պարունակելու են հայատառ տեղեկատվություն:",
 
-        # OBJECT NAMES FOR CAPTCHA
+        "cpc_transparency_title": "Աղբյուրի թափանցիկություն",
+        "cpc_attribution": "Այս գործիքը օգտագործում է Կոռուպցիայի կանխարգելման հանձնաժողովի կողմից տրամադրված հանրային API-ին:",
+        "cpc_website": "ԿԿՀ պաշտոնական կայք",
+        "api_docs": "API փաստաթուղթ",
+
+        "creator_credit": "Ստեղծվել է տվյալների լրագրողի կողմից՝ բոլոր պայծառ մտքերի համար:",
+
+        "feat_target_title": "Թիրախային Արտահանում",
+        "feat_target_desc": "Ընտրեք կոնկրետ տվյալներ (օրինակ՝ անշարժ գույք, եկամուտներ)՝ ճշգրիտ այն, ինչ Ձեզ անհրաժեշտ է:",
+        "feat_auto_title": "Ավտոմատ Հավաքագրում",
+        "feat_auto_desc": "Շրջանցեք ձեռքով որոնումը: Գործիքը ավտոմատ կերպով կատարում է էջավորումը և տվյալների հավաքագրումը:",
+        "feat_export_title": "Պատրաստ է Արտահանման",
+        "feat_export_desc": "Ներբեռնեք տվյալները CSV ձևաչափով՝ անմիջապես օգտագործման համար:",
+
+        "how_works_title": "Ինչպե՞ս է այն աշխատում",
+        "step_1_title": "Ընտրեք Տվյալները",
+        "step_1_desc": "Ընտրեք տվյալի տեսակը (օրինակ՝ դրամական միջոցներ) և տարին:",
+        "step_2_title": "Հաստատեք",
+        "step_2_desc": "Լուծեք պարզ պատկերային խնդիրը՝ հաստատելու, որ դուք ռոբոտ չեք:",
+        "step_3_title": "Արտահանում",
+        "step_3_desc": "Համակարգը ստանում է տվյալները API-ի միջոցով:",
+        "step_4_title": "Ներբեռնում",
+        "step_4_desc": "Ստացեք ձեր տվյալները մեկ ֆայլով:",
+
+        # --- EXISTING TRANSLATIONS ---
+        "security_check": "ԱՆՎՏԱՆԳՈՒԹՅԱՆ ՍՏՈՒԳՈՒՄ",
+        "captcha_prompt": "Ընտրեք բոլոր նշանները՝",
+        "error_captcha": "Սխալ ընտրություն: Փորձեք կրկին:",
         "icon_car": "Ավտոմեքենա",
         "icon_tree": "Ծառ",
         "icon_user": "Մարդ",
@@ -85,8 +143,6 @@ TRANSLATIONS = {
         "icon_plane": "Ինքնաթիռ",
         "icon_star": "Աստղ",
         "icon_heart": "Սիրտ",
-
-        # ... (Keep the rest) ...
         "nav_title": "ԿԿՀ Տվյալների Պորտալ",
         "nav_history": "Պատմություն",
         "header_title": "Կոռուպցիայի կանխարգելման հանձնաժողովի ռեգիստրի տվյալների ավտոմատացված արտահանում",
@@ -94,9 +150,9 @@ TRANSLATIONS = {
         "config_title": "Տվյալների արտահանման պարամետրեր",
         "target_label": "Ընտրեք տվյալների տողը (Թիրախ)",
         "target_placeholder": "Ընտրել տողը...",
-        "target_help": "Ընտրեք ռեեստրի այն հատվածը, որը ցանկանում եք արտահանել:",
+        "target_help": "Ընտրեք հայտարարագրի այն տողը, որը ցանկանում եք արտահանել:",
         "filters_title": "Լրացուցիչ ֆիլտրեր",
-        "label_official_type": "Պաշտոնատար անձի տեսակը",
+        "label_official_type": "Հայտարարատու անձի տեսակը",
         "opt_all": "Բոլորը",
         "label_inst_group": "Հաստատության խումբ",
         "label_decl_type": "Հայտարարագրի տեսակը",
