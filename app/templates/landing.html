@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    /* Hero Section with Animation Background */
+    .hero-section {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 6rem 1rem;
+        border-radius: 16px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 3rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(30, 60, 114, 0.2);
+    }
+
+    /* Floating Icons Animation */
+    .floating-icon {
+        position: absolute;
+        opacity: 0.1;
+        animation: float 10s infinite ease-in-out;
+        color: white;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0px) rotate(0deg); opacity: 0.05; }
+        50% { transform: translateY(-25px) rotate(10deg); opacity: 0.15; }
+        100% { transform: translateY(0px) rotate(0deg); opacity: 0.05; }
+    }
+
+    .icon-1 { top: 10%; left: 8%; font-size: 4rem; animation-duration: 14s; }
+    .icon-2 { top: 15%; right: 12%; font-size: 5rem; animation-duration: 18s; animation-delay: 1s; }
+    .icon-3 { bottom: 12%; left: 15%; font-size: 3rem; animation-duration: 12s; animation-delay: 2s; }
+    .icon-4 { bottom: 8%; right: 18%; font-size: 4rem; animation-duration: 16s; animation-delay: 0.5s; }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 850px;
+        margin: 0 auto;
+    }
+
+    .cta-btn {
+        background-color: #ffffff;
+        color: #1e3c72;
+        padding: 14px 40px;
+        font-weight: 700;
+        border-radius: 50px;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .cta-btn:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        background-color: #f8f9fa;
+        color: #1e3c72;
+    }
+
+    /* Attribution Section */
+    .attribution-box {
+        background: #f1f4f9;
+        border-left: 5px solid #2a5298;
+        padding: 2rem;
+        border-radius: 8px;
+        margin-bottom: 4rem;
+    }
+
+    /* Feature Cards */
+    .feature-card {
+        border: none;
+        border-radius: 16px;
+        transition: all 0.4s ease;
+        height: 100%;
+        background: white;
+        padding: 2.5rem 2rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        border-bottom: 3px solid transparent;
+    }
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        border-bottom: 3px solid #2a5298;
+    }
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        background: rgba(42, 82, 152, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: #1e3c72;
+        margin: 0 auto 1.5rem auto;
+        transition: all 0.3s ease;
+    }
+    .feature-card:hover .feature-icon {
+        background: #1e3c72;
+        color: white;
+        transform: rotateY(180deg);
+    }
+
+    /* Steps Section */
+    .steps-container {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+    }
+    .step-item {
+        position: relative;
+        padding: 1.5rem;
+        transition: transform 0.3s;
+    }
+    .step-item:hover { transform: translateY(-5px); }
+    .step-circle {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin: 0 auto 1.5rem auto;
+        box-shadow: 0 4px 10px rgba(42, 82, 152, 0.3);
+    }
+
+    /* --- CREATOR BADGE STYLES --- */
+    .creator-container {
+        text-align: center;
+        margin-top: 4rem;
+        margin-bottom: 2rem;
+        height: 50px; /* Prevent layout shift */
+    }
+
+    .creator-badge {
+        display: inline-block;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace; /* Code Font */
+        font-size: 0.95rem;
+        color: #1e3c72;
+        background: #eef2f7;
+        padding: 0.8rem 1.5rem;
+        border-radius: 50px;
+        border: 1px solid #dbe2ea;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .creator-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+        border-color: #2a5298;
+        color: #2a5298;
+    }
+
+    /* The Blinking Cursor */
+    .cursor-blink {
+        display: inline-block;
+        width: 2px;
+        height: 1em;
+        background-color: #2a5298;
+        margin-left: 2px;
+        vertical-align: middle;
+        animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* Scroll Animations */
+    .reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease-out;
+    }
+    .reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+
+<div class="hero-section reveal active">
+    <i class="fas fa-file-invoice floating-icon icon-1"></i>
+    <i class="fas fa-database floating-icon icon-2"></i>
+    <i class="fas fa-network-wired floating-icon icon-3"></i>
+    <i class="fas fa-download floating-icon icon-4"></i>
+
+    <div class="hero-content">
+        <h1 class="display-4 fw-bold mb-3">{{ t('hero_title') }}</h1>
+        <p class="lead mb-4 opacity-75 fs-4">
+            {{ t('hero_desc') }}
+        </p>
+
+        <a href="{{ url_for('home.tool') }}" class="cta-btn btn-lg mb-3">
+            <i class="fas fa-rocket me-2"></i> {{ t('cta_start') }}
+        </a>
+    </div>
+</div>
+
+<div class="container reveal">
+    <div class="attribution-box">
+        <div class="row align-items-center">
+            <div class="col-md-8 mb-3 mb-md-0">
+                <h5 class="fw-bold text-dark"><i class="fas fa-university me-2 text-primary"></i>{{ t('cpc_transparency_title') }}</h5>
+                <p class="mb-2 text-muted">
+                    {{ t('cpc_attribution') }}
+                </p>
+                <p class="small text-danger fst-italic mb-0">
+                    <i class="fas fa-info-circle me-1"></i> {{ t('landing_note_data_lang') }}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="https://cpcarmenia.am/" target="_blank" class="btn btn-outline-primary btn-sm mb-2 mb-lg-0 me-2">
+                    <i class="fas fa-globe me-1"></i> {{ t('cpc_website') }}
+                </a>
+                <a href="https://cpcarmenia.am/wp-content/uploads/2024/08/API_Manual_v1.2-ARM-1.pdf" target="_blank" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-book me-1"></i> {{ t('api_docs') }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5 g-4">
+    <div class="col-md-4">
+        <div class="feature-card text-center reveal">
+            <div class="feature-icon">
+                <i class="fas fa-bullseye"></i>
+            </div>
+            <h4 class="fw-bold mb-3">{{ t('feat_target_title') }}</h4>
+            <p class="text-muted">
+                {{ t('feat_target_desc') }}
+            </p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card text-center reveal" style="transition-delay: 0.1s;">
+            <div class="feature-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h4 class="fw-bold mb-3">{{ t('feat_auto_title') }}</h4>
+            <p class="text-muted">
+                {{ t('feat_auto_desc') }}
+            </p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card text-center reveal" style="transition-delay: 0.2s;">
+            <div class="feature-icon">
+                <i class="fas fa-file-csv"></i>
+            </div>
+            <h4 class="fw-bold mb-3">{{ t('feat_export_title') }}</h4>
+            <p class="text-muted">
+                {{ t('feat_export_desc') }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="steps-container mb-5 reveal">
+    <h3 class="text-center fw-bold mb-5" style="color: #1e3c72;">{{ t('how_works_title') }}</h3>
+    <div class="row text-center position-relative">
+        <div class="d-none d-md-block position-absolute start-0 w-100" style="top: 30px; border-top: 2px dashed #dee2e6; z-index: 0;"></div>
+
+        <div class="col-md-3 mb-4 mb-md-0 position-relative" style="z-index: 1;">
+            <div class="step-item">
+                <div class="step-circle">1</div>
+                <h5 class="fw-bold">{{ t('step_1_title') }}</h5>
+                <small class="text-muted">{{ t('step_1_desc') }}</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4 mb-md-0 position-relative" style="z-index: 1;">
+            <div class="step-item">
+                <div class="step-circle">2</div>
+                <h5 class="fw-bold">{{ t('step_2_title') }}</h5>
+                <small class="text-muted">{{ t('step_2_desc') }}</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4 mb-md-0 position-relative" style="z-index: 1;">
+            <div class="step-item">
+                <div class="step-circle">3</div>
+                <h5 class="fw-bold">{{ t('step_3_title') }}</h5>
+                <small class="text-muted">{{ t('step_3_desc') }}</small>
+            </div>
+        </div>
+        <div class="col-md-3 position-relative" style="z-index: 1;">
+            <div class="step-item">
+                <div class="step-circle">4</div>
+                <h5 class="fw-bold">{{ t('step_4_title') }}</h5>
+                <small class="text-muted">{{ t('step_4_desc') }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="creator-container">
+    <div class="creator-badge">
+        <span style="font-weight:bold; margin-right:5px;">&gt;_</span>
+        <span id="typewriter-text"></span><span class="cursor-blink"></span>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // --- SCROLL REVEAL LOGIC ---
+        var reveals = document.querySelectorAll(".reveal");
+        var revealOnScroll = function() {
+            var windowHeight = window.innerHeight;
+            var elementVisible = 150;
+            for (var i = 0; i < reveals.length; i++) {
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        };
+        window.addEventListener("scroll", revealOnScroll);
+        revealOnScroll();
+
+        // --- TYPEWRITER EFFECT LOGIC ---
+        const textToType = "{{ t('creator_credit') }}";
+        const typeWriterElement = document.getElementById('typewriter-text');
+        const badge = document.querySelector('.creator-badge');
+        let i = 0;
+        let hasStarted = false;
+
+        function typeWriter() {
+            if (i < textToType.length) {
+                typeWriterElement.innerHTML += textToType.charAt(i);
+                i++;
+                setTimeout(typeWriter, 50); // Speed of typing (ms)
+            }
+        }
+
+        // Use Intersection Observer to trigger typing when badge comes into view
+        let observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !hasStarted) {
+                    hasStarted = true;
+                    setTimeout(typeWriter, 500); // Small delay before start
+                }
+            });
+        }, { threshold: 0.5 });
+
+        if(badge) observer.observe(badge);
+    });
+</script>
+
+{% endblock %}
