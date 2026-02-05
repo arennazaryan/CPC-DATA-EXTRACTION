@@ -1,0 +1,15 @@
+<table border="1">
+  <tr>
+    {% for h in headers %}
+      <th>{{ h }}</th>
+    {% endfor %}
+  </tr>
+
+  {% for row in rows %}
+  <tr>
+    {% for h in headers %}
+      <td>{{ row[h] }}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</table>

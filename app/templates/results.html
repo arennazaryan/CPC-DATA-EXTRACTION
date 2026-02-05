@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Custom Styling for "Beautiful" Table (Restored from Repo) */
+    .table-modern {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 15px rgba(0,0,0,0.05);
+    }
+    .table-modern thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #ffffff;
+    }
+    .table-modern th {
+        padding: 15px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        border: none;
+    }
+    .table-modern td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #f0f0f0;
+        color: #4a5568;
+        font-size: 0.9rem;
+        vertical-align: middle;
+    }
+    .table-modern tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .table-modern tbody tr:hover {
+        background-color: #f8fafc;
+        transform: scale(1.001);
+        transition: all 0.2s ease;
+    }
+
+    .link-failed-custom {
+        color: #f17579 !important;
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: bold;
+        text-decoration: underline;
+    }
+    .link-failed-custom:hover {
+        color: #d6454a !important;
+    }
+
+    .nav-tabs .nav-link {
+        color: #718096;
+        font-weight: 500;
+        border: none;
+        border-bottom: 3px solid transparent;
+        padding-bottom: 10px;
+    }
+    .nav-tabs .nav-link.active {
+        color: #5a67d8;
+        border-bottom: 3px solid #5a67d8;
+        background: transparent;
+    }
+    .nav-tabs .nav-link:hover {
+        border-color: transparent;
+        color: #5a67d8;
+    }
+</style>
+
+<div class="card shadow-sm border-0" style="border-radius: 15px;">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4 border-bottom-0">
+        <h5 class="mb-0 text-primary fw-bold">
+            <i class="fas fa-table me-2"></i>{{ t('results_title') }}
+        </h5>
+        <div>
+            <a href="/" class="btn btn-outline-secondary px-4 py-2 fw-bold shadow-sm me-2" style="border-radius: 8px;">
+                <i class="fas fa-search me-2"></i>{{ t('btn_new_search') }}
+            </a>
+            {% if total_rows > 0 %}
+            <a href="/download/{{ task_id }}" class="btn btn-success px-4 py-2 fw-bold shadow-sm" style="border-radius: 8px;">
+                <i class="fas fa-file-csv me-2"></i>{{ t('btn_download_data') }}
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card-body px-4 pb-4">
+        <div class="alert alert-light border shadow-sm mb-4 px-4 py-3" style="border-radius: 10px; background-color: #fcfcfc;">
+            <div class="row align-items-center g-4">
+                <div class="col-auto text-center border-end pe-4">
+                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">{{ t('stat_total_records') }}</small>
+                    <span class="h4 fw-bold text-dark mb-0">{{ total_rows }}</span>
+                </div>
+
+                <div class="col-auto text-center border-end pe-4">
+                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">{{ t('stat_failed_ids') }}</small>
+                    {% if failed_ids %}
+                        <span class="h4 fw-bold mb-0" style="color: #f17579;">{{ failed_ids|length }}</span>
+                    {% else %}
+                        <span class="h4 fw-bold text-success mb-0">0</span>
+                    {% endif %}
+                </div>
+
+                <div class="col">
+                    <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">{{ t('stat_filter_context') }}</small>
+                    <div class="d-flex align-items-start">
+                        <span class="badge bg-primary me-2 mt-1">{{ metadata.filters.year }}</span>
+                        <span class="h6 fw-bold text-primary mb-0 lh-base">{{ metadata.filters.row_name }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if total_rows == 0 and not failed_ids %}
+        <div class="text-center py-5">
+            <div class="mb-3">
+                <i class="fas fa-folder-open fa-4x text-muted opacity-25"></i>
+            </div>
+            <h4 class="text-muted fw-bold">{{ t('msg_no_data') }}</h4>
+            <p class="text-secondary mb-4">
+                {{ t('msg_no_data_desc') }} ({{ metadata.filters.year }})
+            </p>
+            <a href="/" class="btn btn-primary px-4 py-2" style="border-radius: 8px;">
+                <i class="fas fa-arrow-left me-2"></i>{{ t('btn_back_filters') }}
+            </a>
+        </div>
+        {% else %}
+
+        <ul class="nav nav-tabs mb-4" id="resultTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="data-tab" data-bs-toggle="tab" href="#data" role="tab">
+                    <i class="fas fa-table me-2"></i>{{ t('tab_success') }}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="failed-tab" data-bs-toggle="tab" href="#failed" role="tab">
+                    <i class="fas fa-exclamation-circle me-2"></i>{{ t('tab_failed') }}
+                    {% if failed_ids %}
+                    <span class="badge rounded-pill ms-2" style="background-color: #f17579;">{{ failed_ids|length }}</span>
+                    {% endif %}
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="data" role="tabpanel">
+                {% if total_rows > 0 %}
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto; border-radius: 10px;">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                {% for col in columns %}
+                                <th style="white-space: nowrap;">{{ col }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in preview_data %}
+                            <tr>
+                                {% for col in columns %}
+                                <td class="text-truncate" style="max-width: 250px;" title="{{ row[col] }}">
+                                    {% if col == 'id' and row[col] %}
+                                        <a href="https://cpcarmenia.am/declaration/?id={{ row[col] }}" target="_blank" class="fw-bold text-decoration-none text-primary">
+                                            {{ row[col] }} <i class="fas fa-external-link-alt fa-xs ms-1 opacity-50"></i>
+                                        </a>
+                                    {% else %}
+                                        {{ row[col] if row[col] is not none else '-' }}
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if total_rows > 50 %}
+                <div class="text-center py-3 mt-2 text-muted small fst-italic">
+                    {{ t('msg_showing_50') }}
+                </div>
+                {% endif %}
+                {% else %}
+                 <div class="text-center py-5 text-muted">
+                    <p>{{ t('msg_no_rows_success') }}</p>
+                 </div>
+                {% endif %}
+            </div>
+
+            <div class="tab-pane fade" id="failed" role="tabpanel">
+                {% if failed_ids %}
+                <div class="card bg-light border-0 p-3">
+                    <h6 class="text-muted mb-3">{{ t('msg_failed_list') }}</h6>
+                    <div style="font-family: monospace; font-size: 0.95rem;">
+                        {% for item in failed_ids %}
+                        <div class="mb-1">
+                            <a href="https://cpcarmenia.am/declaration/?id={{ item.id }}" target="_blank" class="link-failed-custom">
+                                {{ item.id }}
+                            </a>
+                            <span class="text-muted ms-1">- {{ item.reason }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center p-5 text-muted">
+                    <i class="fas fa-check-circle fa-3x mb-3 text-success opacity-50"></i>
+                    <p class="h5">{{ t('msg_no_errors') }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

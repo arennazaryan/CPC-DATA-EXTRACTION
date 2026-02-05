@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .captcha-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px; /* Reduced gap */
+        width: 100%;
+        max-width: 210px; /* Smaller overall width */
+        margin-top: 5px;
+    }
+    .captcha-item {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6; /* Thinner border */
+        border-radius: 6px;
+        height: 45px; /* Smaller height */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 1.2rem; /* Smaller icon */
+        color: #6c757d;
+    }
+    .captcha-item:hover {
+        background: #e9ecef;
+    }
+    .captcha-item.selected {
+        background: #cfe2ff;
+        border-color: #0d6efd;
+        color: #0d6efd;
+        box-shadow: inset 0 0 0 1px #0d6efd;
+    }
+    /* Compact Refresh Button */
+    .btn-refresh-sm {
+        font-size: 0.85rem;
+        padding: 2px 6px;
+        color: #6c757d;
+        cursor: pointer;
+    }
+    .btn-refresh-sm:hover { color: #0d6efd; }
+</style>
+
+<div class="card shadow-sm border-0 mb-4 overflow-hidden" style="border-radius: 12px;">
+    <div class="card-body p-4 text-white" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h3 class="mb-3 fw-bold">
+                    <i class="fas fa-database me-2 opacity-50"></i>{{ t('header_title') }}
+                </h3>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <div class="d-inline-flex align-items-center gap-2 text-white-50 small bg-white bg-opacity-10 rounded px-3 py-1">
+                    <i class="fas fa-cloud-download-alt"></i>
+                    <span>{{ t('header_subtitle') }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom py-3 px-4">
+                <h5 class="mb-0 text-primary fw-bold">
+                    <i class="fas fa-sliders-h me-2"></i>{{ t('config_title') }}
+                </h5>
+            </div>
+
+            <div class="card-body p-4">
+                <form id="extractionForm">
+                    {% include "partials/filters_form.html" %}
+
+                    <div class="row mt-4 pt-3 border-top" id="captchaRow">
+                        <div class="col-md-5 col-lg-4">
+                            <div class="p-2 border rounded bg-light d-inline-block">
+                                <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.9rem;">
+                                    <span class="fw-bold text-dark me-2">
+                                        {{ t('captcha_prompt') }}
+                                        <span id="targetName" class="text-primary text-uppercase fw-bold">...</span>
+                                    </span>
+                                    <i class="fas fa-sync-alt btn-refresh-sm" onclick="loadCaptcha()" title="Refresh"></i>
+                                </div>
+
+                                <div id="gridContainer" class="captcha-grid">
+                                    </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-7 col-lg-4 d-flex align-items-center justify-content-md-end mt-3 mt-md-0">
+                            <button type="button" id="startBtn" class="btn btn-primary px-5 py-3 fw-bold shadow-sm w-100 w-md-auto" onclick="startExtraction()">
+                                <i class="fas fa-play me-2"></i>{{ t('btn_start') }}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="errorAlert" class="alert alert-danger mt-4 d-none shadow-sm border-0 align-items-center">
+                    <i class="fas fa-exclamation-circle me-2 fs-5"></i>
+                    <span id="errorText" class="fw-bold"></span>
+                </div>
+
+                <div id="processingArea" class="mt-4 p-4 bg-light rounded-3 border d-none position-relative overflow-hidden">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 id="statusText" class="m-0 fw-bold text-dark">{{ t('status_init') }}</h5>
+                            <small class="text-muted" id="counts">0 / 0</small>
+                            <br>
+                            <small class="text-primary fw-bold" id="etaText"></small>
+                        </div>
+                        <button onclick="stopExtraction()" id="stopBtn" class="btn btn-outline-danger btn-sm px-3">
+                            <i class="fas fa-stop me-1"></i> {{ t('btn_stop') }}
+                        </button>
+                    </div>
+
+                    <div class="progress" style="height: 12px; border-radius: 6px;">
+                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+const TEXT = {
+    start: "{{ t('btn_start') }}",
+    verifying: "{{ t('btn_verifying') }}",
+    stop: "{{ t('btn_stop') }}",
+    stopped: "{{ t('btn_stopped') }}",
+    status_complete: "{{ t('status_complete') }}",
+    status_stopped: "{{ t('status_stopped') }}",
+    error_captcha: "{{ t('error_captcha') }}",
+    error_fields: "{{ t('error_fields') }}"
+};
+
+let selectedIndices = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadCaptcha();
+
+    new TomSelect("#select-row", {create: false, sortField: {field: "text", direction: "asc"}, maxOptions: 50});
+    window.instSelect = new TomSelect("#select-inst", {create: false, sortField: {field: "text", direction: "asc"}, allowEmptyOption: true});
+    new TomSelect("#select-declarant", {controlInput: null});
+    new TomSelect("#select-type", {controlInput: null});
+    new TomSelect("#select-group", {controlInput: null});
+});
+
+async function loadCaptcha() {
+    const container = document.getElementById('gridContainer');
+    // Reduced padding for loading spinner
+    container.innerHTML = '<div class="text-center w-100 py-3"><i class="fas fa-spinner fa-spin text-muted small"></i></div>';
+    selectedIndices = [];
+
+    try {
+        const resp = await fetch('/captcha-puzzle');
+        const data = await resp.json();
+
+        document.getElementById('targetName').innerText = data.target_name;
+        container.innerHTML = '';
+
+        data.grid.forEach((iconClass, index) => {
+            const div = document.createElement('div');
+            div.className = 'captcha-item';
+            div.innerHTML = `<i class="fas ${iconClass}"></i>`;
+            div.onclick = () => toggleSelection(div, index);
+            container.appendChild(div);
+        });
+
+    } catch (e) {
+        console.error("Captcha load failed", e);
+    }
+}
+
+function toggleSelection(el, index) {
+    if (selectedIndices.includes(index)) {
+        selectedIndices = selectedIndices.filter(i => i !== index);
+        el.classList.remove('selected');
+    } else {
+        selectedIndices.push(index);
+        el.classList.add('selected');
+    }
+}
+
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) resetUI();
+});
+
+function resetUI() {
+    document.getElementById('captchaRow').classList.remove('d-none');
+    document.getElementById('processingArea').classList.add('d-none');
+    const btn = document.getElementById('startBtn');
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fas fa-play me-2"></i>${TEXT.start}`;
+    if(window.pollInterval) clearInterval(window.pollInterval);
+}
+
+function validateLimit(input) {
+    const val = parseInt(input.value);
+    if (val > 100) { input.classList.add('is-invalid'); return false; }
+    else { input.classList.remove('is-invalid'); return true; }
+}
+
+const groupToInst = {{ group_to_inst | tojson }};
+function filterInstitutions() {
+    const groupId = document.getElementById('select-group').value;
+    const instSelectInstance = window.instSelect;
+    instSelectInstance.clear();
+    instSelectInstance.clearOptions();
+    instSelectInstance.addOption({value: "0", text: "{{ t('opt_all') }}"});
+
+    const allInsts = {{ institutions | tojson }};
+    if (groupId === "0") {
+        for (const [id, name] of Object.entries(allInsts)) instSelectInstance.addOption({value: id, text: name});
+    } else {
+        const allowedIds = groupToInst[groupId] || [];
+        allowedIds.forEach(id => { if (allInsts[id]) instSelectInstance.addOption({value: id, text: allInsts[id]}); });
+    }
+    instSelectInstance.refreshOptions();
+}
+
+let currentTaskId = null;
+let startTime = null;
+window.pollInterval = null;
+
+async function startExtraction() {
+    const limitInput = document.getElementById('limitInput');
+    if (!validateLimit(limitInput)) return;
+
+    const formData = new FormData(document.getElementById('extractionForm'));
+    const data = {};
+    formData.forEach((value, key) => data[key] = value);
+
+    data.captcha_selection = selectedIndices;
+
+    if(!data.row_name || !data.year) { alert(TEXT.error_fields); return; }
+    if(selectedIndices.length === 0) { showError(TEXT.error_captcha); return; }
+
+    const btn = document.getElementById('startBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>${TEXT.verifying}`;
+    document.getElementById('errorAlert').classList.add('d-none');
+
+    startTime = Date.now();
+
+    try {
+        const resp = await fetch('/start', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+            body: JSON.stringify(data)
+        });
+
+        const json = await resp.json();
+
+        if (!resp.ok) {
+            let msg = json.error;
+            if (msg === "CAPTCHA_FAIL") msg = TEXT.error_captcha;
+            throw new Error(msg || "Error");
+        }
+
+        currentTaskId = json.task_id;
+        document.getElementById('captchaRow').classList.add('d-none');
+        document.getElementById('processingArea').classList.remove('d-none');
+
+        const bar = document.getElementById('progressBar');
+        bar.className = 'progress-bar progress-bar-striped progress-bar-animated';
+        bar.style.width = '0%';
+        bar.classList.remove('bg-success');
+
+        const stopBtn = document.getElementById('stopBtn');
+        stopBtn.disabled = false;
+        stopBtn.innerHTML = `<i class="fas fa-stop me-1"></i> ${TEXT.stop}`;
+        document.getElementById('statusText').className = 'm-0 fw-bold text-dark';
+
+        window.pollInterval = setInterval(checkStatus, 1000);
+
+    } catch (e) {
+        document.getElementById('captchaRow').classList.remove('d-none');
+        const btn = document.getElementById('startBtn');
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fas fa-play me-2"></i>${TEXT.start}`;
+        showError(e.message);
+        loadCaptcha();
+    }
+}
+
+async function checkStatus() {
+    if (!currentTaskId) return;
+    try {
+        const resp = await fetch(`/status/${currentTaskId}`);
+        const status = await resp.json();
+
+        const percent = status.total > 0 ? Math.round((status.progress / status.total) * 100) : 0;
+        const bar = document.getElementById('progressBar');
+        bar.style.width = percent + '%';
+        document.getElementById('counts').innerText = `${status.progress} / ${status.total}`;
+
+        if(status.progress > 0 && status.total > 0) {
+            const elapsed = (Date.now() - startTime) / 1000;
+            const rate = elapsed / status.progress;
+            const remaining = status.total - status.progress;
+            const eta = Math.round(rate * remaining);
+            document.getElementById('etaText').innerText = `ETA: ~${eta}s`;
+        }
+
+        if (status.status === 'finished') {
+            clearInterval(window.pollInterval);
+            const statusText = document.getElementById('statusText');
+            statusText.innerText = TEXT.status_complete;
+            statusText.className = 'm-0 fw-bold text-success';
+            bar.classList.remove('progress-bar-animated');
+            bar.classList.add('bg-success');
+            setTimeout(() => window.location.href = `/results/${currentTaskId}`, 800);
+        }
+        else if (status.status === 'stopped') {
+            clearInterval(window.pollInterval);
+            document.getElementById('statusText').innerText = TEXT.status_stopped;
+            bar.classList.remove('progress-bar-animated');
+            bar.classList.add('bg-warning');
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('stopBtn').innerHTML = `<i class="fas fa-stop me-1"></i> ${TEXT.stopped}`;
+
+            document.getElementById('captchaRow').classList.remove('d-none');
+            const btn = document.getElementById('startBtn');
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fas fa-play me-2"></i>${TEXT.start}`;
+            loadCaptcha();
+
+            setTimeout(() => window.location.href = `/results/${currentTaskId}`, 1500);
+        }
+        else if (status.status === 'error') {
+            clearInterval(window.pollInterval);
+            document.getElementById('processingArea').classList.add('d-none');
+            document.getElementById('captchaRow').classList.remove('d-none');
+            const btn = document.getElementById('startBtn');
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fas fa-play me-2"></i>${TEXT.start}`;
+            showError(status.message);
+        }
+    } catch (e) { console.error(e); }
+}
+
+function showError(msg) {
+    const alertBox = document.getElementById('errorAlert');
+    document.getElementById('errorText').innerText = msg;
+    alertBox.classList.remove('d-none');
+    alertBox.scrollIntoView({behavior: 'smooth', block: 'center'});
+}
+
+async function stopExtraction() {
+    await fetch(`/stop/${currentTaskId}`, { method: 'POST', headers: {'X-CSRFToken': csrfToken} });
+}
+</script>
+{% endblock %}
