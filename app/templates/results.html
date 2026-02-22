@@ -73,7 +73,7 @@
             <i class="fas fa-table me-2"></i>{{ t('results_title') }}
         </h5>
         <div>
-            <a href="/" class="btn btn-outline-secondary px-4 py-2 fw-bold shadow-sm me-2" style="border-radius: 8px;">
+            <a href="/tool" class="btn btn-outline-secondary px-4 py-2 fw-bold shadow-sm me-2" style="border-radius: 8px;">
                 <i class="fas fa-search me-2"></i>{{ t('btn_new_search') }}
             </a>
             {% if total_rows > 0 %}
@@ -85,6 +85,11 @@
     </div>
 
     <div class="card-body px-4 pb-4">
+
+        <div class="alert alert-warning py-2 small mb-4 shadow-sm border-0 text-dark" style="background-color: #fff3cd;">
+            <i class="fas fa-exclamation-triangle me-2 text-warning"></i><strong>{{ t('note_check_data') }}</strong>
+        </div>
+
         <div class="alert alert-light border shadow-sm mb-4 px-4 py-3" style="border-radius: 10px; background-color: #fcfcfc;">
             <div class="row align-items-center g-4">
                 <div class="col-auto text-center border-end pe-4">
@@ -120,7 +125,7 @@
             <p class="text-secondary mb-4">
                 {{ t('msg_no_data_desc') }} ({{ metadata.filters.year }})
             </p>
-            <a href="/" class="btn btn-primary px-4 py-2" style="border-radius: 8px;">
+            <a href="/tool" class="btn btn-primary px-4 py-2" style="border-radius: 8px;">
                 <i class="fas fa-arrow-left me-2"></i>{{ t('btn_back_filters') }}
             </a>
         </div>
