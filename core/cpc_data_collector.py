@@ -1,14 +1,13 @@
 import requests
 import concurrent.futures
 import json
+import urllib3
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from app.config import Config
+from core.row_config import rows_dict
 
-try:
-    from core.row_config import rows_dict
-except ImportError:
-    from .row_config import rows_dict
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class CpcDataCollector:
@@ -27,16 +26,18 @@ class CpcDataCollector:
 
         self.progress_callback = progress_callback
         self.stop_event = stop_event
-        self.retry_ids = retry_ids if retry_ids else []
+        self.retry_ids: list = retry_ids if retry_ids else []
 
-        self.declaration_list = []
-        self.declarant_ids = []
-        self.rows_by_id = {}
-        self.headers_by_id = {}
-        self.final_data = []
-        self.failed_items = []
+        self.declaration_list: list = []
+        self.declarant_ids: list = []
+        self.rows_by_id: dict = {}
+        self.headers_by_id: dict = {}
+        self.final_data: list = []
+        self.failed_items: list = []
 
         self.session = requests.Session()
+        self.session.verify = False
+
         retries = Retry(total=5, backoff_factor=2, status_forcelist=[429, 500, 502, 503, 504])
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
         self.session.headers.update({"User-Agent": Config.USER_AGENT})
@@ -48,7 +49,8 @@ class CpcDataCollector:
             return resp
         except requests.exceptions.HTTPError as e:
             raise Exception(f"API Error {e.response.status_code}")
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.ConnectionError as e:
+            print(f"Underlying Connection Error: {e}")
             raise Exception("Connection failed")
         except requests.exceptions.Timeout:
             raise Exception("Timeout")
@@ -88,37 +90,50 @@ class CpcDataCollector:
             print(f"List Fetch Error: {e}")
             return [], []
 
+    @staticmethod
+    def _safe_extract(data, key_chain):
+        """Safely navigates a nested JSON object using a list of keys/indices."""
+        current = data
+        for key in key_chain:
+            try:
+                current = current[key]
+            except (KeyError, IndexError, TypeError):
+                return None
+        return current
+
     def _fetch_single_row(self, declarant_id, key_chain):
-        # Even if stopped, we return a safe value here.
-        # The main loop below handles the actual early exit.
+        # 1. IMMEDIATE CHECK: If stopped, do not make any network requests or proceed
         if self.stop_event and self.stop_event.is_set():
-            return (declarant_id, None, "Stopped")
+            return declarant_id, None, "Stopped"
 
         url = f"{Config.CPC_BASE_URL}/declaration/{declarant_id}"
 
         try:
             resp = self._safe_request("GET", url)
-            section = resp.json()
-            for key in key_chain:
-                key = int(key) if key.isdigit() else key
-                section = section[key]
-            return (declarant_id, section, None)
 
-        except (KeyError, IndexError, TypeError):
-            return (declarant_id, None, "Data section not found")
+            if self.stop_event and self.stop_event.is_set():
+                return declarant_id, None, "Stopped"
+
+            data = resp.json()
+            section = self._safe_extract(data, key_chain)
+
+            if section is None:
+                return declarant_id, None, "Data section not found"
+            return declarant_id, section, None
+
         except json.JSONDecodeError:
-            return (declarant_id, None, "Invalid JSON")
+            return declarant_id, None, "Invalid JSON"
         except Exception as e:
-            return (declarant_id, None, str(e))
+            return declarant_id, None, str(e)
 
     def get_row_data(self):
-        import re
-        path_string = rows_dict.get(self.row_name)
-        if not path_string: return {}
+        key_chain = rows_dict.get(self.row_name)
+        if not key_chain:
+            return {}
 
-        key_chain = re.findall(r"\[['\"]?(.+?)['\"]?]", path_string)
         total = len(self.declarant_ids)
-        if total == 0: return {}
+        if total == 0:
+            return {}
 
         completed = 0
 
@@ -128,24 +143,19 @@ class CpcDataCollector:
                 for d_id in self.declarant_ids
             }
 
-            # FIX: Non-blocking loop for instant stopping
-            # We convert keys to a set so we can remove them as they complete
             futures_set = set(future_to_id.keys())
 
             while futures_set:
-                # 1. Check Stop Signal IMMEDIATELY
                 if self.stop_event and self.stop_event.is_set():
                     executor.shutdown(wait=False, cancel_futures=True)
                     break
 
-                # 2. Wait for at least one future to complete, but timeout every 0.5s to check stop again
                 done, _ = concurrent.futures.wait(
                     futures_set,
                     timeout=0.5,
                     return_when=concurrent.futures.FIRST_COMPLETED
                 )
 
-                # 3. Process completed futures
                 for future in done:
                     futures_set.remove(future)
                     declarant_id = future_to_id[future]
@@ -154,7 +164,7 @@ class CpcDataCollector:
                         _, result, error_reason = future.result()
                         if result is not None:
                             self.rows_by_id[declarant_id] = result
-                        else:
+                        elif error_reason != "Stopped":
                             self.failed_items.append({'id': declarant_id, 'reason': error_reason})
                     except Exception as e:
                         self.failed_items.append({'id': declarant_id, 'reason': str(e)})
@@ -199,7 +209,8 @@ class CpcDataCollector:
 
         for person in self.declaration_list:
             d_id = person["id"]
-            if d_id in failed_id_set: continue
+            if d_id in failed_id_set:
+                continue
 
             rows = self.rows_by_id.get(d_id, [])
             headers = self.headers_by_id.get(d_id, [])
