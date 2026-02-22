@@ -1,6 +1,5 @@
 TRANSLATIONS = {
     "en": {
-        # --- LANDING PAGE ---
         "nav_home": "Home",
         "nav_tool": "Tool",
         "hero_title": "CPC Data Extraction Portal",
@@ -23,8 +22,8 @@ TRANSLATIONS = {
         "feat_export_desc": "Download your extracted datasets immediately in CSV format.",
 
         "how_works_title": "How It Works",
-        "step_1_title": "Select Data",
-        "step_1_desc": "Choose the data row (e.g., Cash) and year.",
+        "step_1_title": "Select Filters",
+        "step_1_desc": "Select filters to narrow down your data.",
         "step_2_title": "Verify",
         "step_2_desc": "Solve a quick visual puzzle to confirm you are human.",
         "step_3_title": "Extract",
@@ -32,7 +31,8 @@ TRANSLATIONS = {
         "step_4_title": "Download",
         "step_4_desc": "Get your dataset in a single file.",
 
-        # --- EXISTING TRANSLATIONS ---
+        "note_check_data": "Always verify the extracted data before using it.",
+
         "security_check": "SECURITY CHECK",
         "captcha_prompt": "Select all icons of:",
         "error_captcha": "Incorrect selection. Please try again.",
@@ -98,7 +98,6 @@ TRANSLATIONS = {
         "btn_results": "View"
     },
     "hy": {
-        # --- LANDING PAGE ---
         "nav_home": "Գլխավոր",
         "nav_tool": "Գործիք",
         "hero_title": "ԿԿՀ Տվյալների Արտահանման Պորտալ",
@@ -121,8 +120,8 @@ TRANSLATIONS = {
         "feat_export_desc": "Ներբեռնեք տվյալները CSV ձևաչափով՝ անմիջապես օգտագործման համար:",
 
         "how_works_title": "Ինչպե՞ս է այն աշխատում",
-        "step_1_title": "Ընտրեք Տվյալները",
-        "step_1_desc": "Ընտրեք տվյալի տեսակը (օրինակ՝ դրամական միջոցներ) և տարին:",
+        "step_1_title": "Ընտրեք Ֆիլտրեր",
+        "step_1_desc": "Ընտրեք ֆիլտրեր տվյալները արտահանելու համար:",
         "step_2_title": "Հաստատեք",
         "step_2_desc": "Լուծեք պարզ պատկերային խնդիրը՝ հաստատելու, որ դուք ռոբոտ չեք:",
         "step_3_title": "Արտահանում",
@@ -130,7 +129,8 @@ TRANSLATIONS = {
         "step_4_title": "Ներբեռնում",
         "step_4_desc": "Ստացեք ձեր տվյալները մեկ ֆայլով:",
 
-        # --- EXISTING TRANSLATIONS ---
+        "note_check_data": "Միշտ ստուգեք արտահանված տվյալները նախքան դրանք օգտագործելը:",
+
         "security_check": "ԱՆՎՏԱՆԳՈՒԹՅԱՆ ՍՏՈՒԳՈՒՄ",
         "captcha_prompt": "Ընտրեք բոլոր նշանները՝",
         "error_captcha": "Սխալ ընտրություն: Փորձեք կրկին:",
