@@ -11,13 +11,11 @@ class CollectorService:
             year = int(form_data.get('year'))
             limit = int(form_data.get('limit'))
 
-            # Optional filters
             declarant_type = form_data.get('declarant_type')
             t_type = form_data.get('type')
             inst_group = form_data.get('group')
             institution = form_data.get('institution')
 
-            # Retry IDs (List of integers)
             retry_ids = form_data.get('retry_ids')
 
             if inst_group == "0": inst_group = None
