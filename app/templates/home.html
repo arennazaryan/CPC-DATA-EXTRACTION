@@ -52,6 +52,10 @@
             </div>
 
             <div class="card-body p-4">
+                <div class="alert alert-warning py-2 small mb-4 shadow-sm border-0 text-dark" style="background-color: #fff3cd;">
+                    <i class="fas fa-exclamation-triangle me-2 text-warning"></i><strong>{{ t('note_check_data') }}</strong>
+                </div>
+
                 <form id="extractionForm">
                     {% include "partials/filters_form.html" %}
 
@@ -90,7 +94,6 @@
                             <h5 id="statusText" class="m-0 fw-bold text-dark">{{ t('status_init') }}</h5>
                             <small class="text-muted" id="counts">0 / 0</small>
                             <br>
-                            <small class="text-primary fw-bold" id="etaText"></small>
                         </div>
                         <button onclick="stopExtraction()" id="stopBtn" class="btn btn-outline-danger btn-sm px-3">
                             <i class="fas fa-stop me-1"></i> {{ t('btn_stop') }}
@@ -280,14 +283,6 @@ async function checkStatus() {
         const bar = document.getElementById('progressBar');
         bar.style.width = percent + '%';
         document.getElementById('counts').innerText = `${status.progress} / ${status.total}`;
-
-        if(status.progress > 0 && status.total > 0) {
-            const elapsed = (Date.now() - startTime) / 1000;
-            const rate = elapsed / status.progress;
-            const remaining = status.total - status.progress;
-            const eta = Math.round(rate * remaining);
-            document.getElementById('etaText').innerText = `ETA: ~${eta}s`;
-        }
 
         if (status.status === 'finished') {
             clearInterval(window.pollInterval);
