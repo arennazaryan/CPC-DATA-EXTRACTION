@@ -43,23 +43,24 @@
         margin: 0 auto;
     }
 
+    /* CTA Button - Updated Color */
     .cta-btn {
-        background-color: #ffffff;
-        color: #1e3c72;
-        padding: 14px 40px;
-        font-weight: 700;
+        background-color: #f17579;
+        color: #ffffff !important;
+        padding: 18px 50px;
+        font-size: 1.25rem;
+        font-weight: 800;
         border-radius: 50px;
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         text-decoration: none;
         display: inline-flex;
         align-items: center;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 15px rgba(241, 117, 121, 0.4);
     }
     .cta-btn:hover {
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        background-color: #f8f9fa;
-        color: #1e3c72;
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(241, 117, 121, 0.6);
+        background-color: #d6454a;
     }
 
     /* Attribution Section */
@@ -134,47 +135,6 @@
         box-shadow: 0 4px 10px rgba(42, 82, 152, 0.3);
     }
 
-    /* --- CREATOR BADGE STYLES --- */
-    .creator-container {
-        text-align: center;
-        margin-top: 4rem;
-        margin-bottom: 2rem;
-        height: 50px; /* Prevent layout shift */
-    }
-
-    .creator-badge {
-        display: inline-block;
-        font-family: 'Consolas', 'Monaco', 'Courier New', monospace; /* Code Font */
-        font-size: 0.95rem;
-        color: #1e3c72;
-        background: #eef2f7;
-        padding: 0.8rem 1.5rem;
-        border-radius: 50px;
-        border: 1px solid #dbe2ea;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-        transition: all 0.3s ease;
-        position: relative;
-    }
-
-    .creator-badge:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.08);
-        border-color: #2a5298;
-        color: #2a5298;
-    }
-
-    /* The Blinking Cursor */
-    .cursor-blink {
-        display: inline-block;
-        width: 2px;
-        height: 1em;
-        background-color: #2a5298;
-        margin-left: 2px;
-        vertical-align: middle;
-        animation: blink 1s step-end infinite;
-    }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
     /* Scroll Animations */
     .reveal {
         opacity: 0;
@@ -199,7 +159,7 @@
             {{ t('hero_desc') }}
         </p>
 
-        <a href="{{ url_for('home.tool') }}" class="cta-btn btn-lg mb-3">
+        <a href="{{ url_for('home.tool') }}" class="cta-btn mb-3">
             <i class="fas fa-rocket me-2"></i> {{ t('cta_start') }}
         </a>
     </div>
@@ -208,21 +168,27 @@
 <div class="container reveal">
     <div class="attribution-box">
         <div class="row align-items-center">
-            <div class="col-md-8 mb-3 mb-md-0">
+            <div class="col-lg-7 mb-3 mb-lg-0">
                 <h5 class="fw-bold text-dark"><i class="fas fa-university me-2 text-primary"></i>{{ t('cpc_transparency_title') }}</h5>
-                <p class="mb-2 text-muted">
+
+                <p class="mb-3 text-muted fs-5">
                     {{ t('cpc_attribution') }}
                 </p>
-                <p class="small text-danger fst-italic mb-0">
+
+                <p class="text-danger fst-italic mb-0" style="font-size: 0.75rem;">
                     <i class="fas fa-info-circle me-1"></i> {{ t('landing_note_data_lang') }}
                 </p>
             </div>
-            <div class="col-md-4 text-md-end">
-                <a href="https://cpcarmenia.am/" target="_blank" class="btn btn-outline-primary btn-sm mb-2 mb-lg-0 me-2">
-                    <i class="fas fa-globe me-1"></i> {{ t('cpc_website') }}
+
+            <div class="col-lg-5 d-flex flex-column align-items-lg-end gap-2 mt-3 mt-lg-0">
+                <a href="https://github.com/arennazaryan/CPC-DATA-EXTRACTION/tree/main" target="_blank" class="btn btn-outline-dark btn-sm text-start w-auto">
+                    <i class="fab fa-github me-2"></i> GitHub Source
                 </a>
-                <a href="https://cpcarmenia.am/wp-content/uploads/2024/08/API_Manual_v1.2-ARM-1.pdf" target="_blank" class="btn btn-outline-secondary btn-sm">
-                    <i class="fas fa-book me-1"></i> {{ t('api_docs') }}
+                <a href="https://cpcarmenia.am/wp-content/uploads/2024/08/API_Manual_v1.2-ARM-1.pdf" target="_blank" class="btn btn-outline-secondary btn-sm text-start w-auto">
+                    <i class="fas fa-book me-2"></i> {{ t('api_docs') }}
+                </a>
+                <a href="https://cpcarmenia.am/" target="_blank" class="btn btn-outline-primary btn-sm text-start w-auto">
+                    <i class="fas fa-globe me-2"></i> {{ t('cpc_website') }}
                 </a>
             </div>
         </div>
@@ -301,13 +267,6 @@
     </div>
 </div>
 
-<div class="creator-container">
-    <div class="creator-badge">
-        <span style="font-weight:bold; margin-right:5px;">&gt;_</span>
-        <span id="typewriter-text"></span><span class="cursor-blink"></span>
-    </div>
-</div>
-
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // --- SCROLL REVEAL LOGIC ---
@@ -324,33 +283,6 @@
         };
         window.addEventListener("scroll", revealOnScroll);
         revealOnScroll();
-
-        // --- TYPEWRITER EFFECT LOGIC ---
-        const textToType = "{{ t('creator_credit') }}";
-        const typeWriterElement = document.getElementById('typewriter-text');
-        const badge = document.querySelector('.creator-badge');
-        let i = 0;
-        let hasStarted = false;
-
-        function typeWriter() {
-            if (i < textToType.length) {
-                typeWriterElement.innerHTML += textToType.charAt(i);
-                i++;
-                setTimeout(typeWriter, 50); // Speed of typing (ms)
-            }
-        }
-
-        // Use Intersection Observer to trigger typing when badge comes into view
-        let observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !hasStarted) {
-                    hasStarted = true;
-                    setTimeout(typeWriter, 500); // Small delay before start
-                }
-            });
-        }, { threshold: 0.5 });
-
-        if(badge) observer.observe(badge);
     });
 </script>
 
