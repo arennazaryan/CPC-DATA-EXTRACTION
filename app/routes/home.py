@@ -1,13 +1,15 @@
 import random
-from flask import Blueprint, render_template, request, jsonify, session, Response, redirect, url_for
+from urllib.parse import urlparse
+from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, current_app
 from app.services.task_manager import start_collection_task, get_task_status, stop_task
 from app.services.cache_service import get_history
 from app.translations import TRANSLATIONS
 from core.row_config import rows_dict, DECLARANT_TYPES, TYPE_OPTIONS, INST_GROUPS, INSTITUTIONS, GROUP_TO_INST
+import os
+import time
 
 home_bp = Blueprint("home", __name__)
 
-# --- CAPTCHA CONFIG ---
 ICONS = {
     "icon_car": "fa-car",
     "icon_tree": "fa-tree",
@@ -20,13 +22,39 @@ ICONS = {
     "icon_heart": "fa-heart"
 }
 
+def cleanup_old_files():
+    """Deletes CSV files in temp_data that are older than 1 hour to prevent Render disk crashes."""
+    temp_dir = current_app.config.get('TEMP_DATA_DIR')
+
+    if not temp_dir or not os.path.exists(temp_dir):
+        return
+
+    current_time = time.time()
+
+    for filename in os.listdir(temp_dir):
+        filepath = os.path.join(temp_dir, filename)
+
+        if os.path.isfile(filepath) and filename.endswith('.csv'):
+
+            file_modified_time = os.path.getmtime(filepath)
+
+            if file_modified_time < (current_time - 3600):
+                try:
+                    os.remove(filepath)
+                    print(f"System Cleanup: Deleted old file -> {filename}")
+                except Exception as e:
+                    print(f"System Cleanup Error: Could not delete {filename}. Error: {e}")
 
 @home_bp.route("/set-lang/<lang_code>")
 def set_language(lang_code):
     if lang_code in ['en', 'hy']:
         session['lang'] = lang_code
-    # Redirect to referrer or default to landing page
-    return redirect(request.referrer or url_for('home.index'))
+
+    ref = request.referrer
+    if ref and urlparse(ref).netloc == request.host:
+        return redirect(ref)
+
+    return redirect(url_for('home.index'))
 
 
 @home_bp.route("/")
@@ -34,6 +62,8 @@ def index():
     """
     New Landing/Greeting Page.
     """
+    cleanup_old_files()
+
     return render_template("landing.html")
 
 
@@ -58,12 +88,10 @@ def get_captcha_puzzle():
     """Generates a 3x3 grid puzzle for the frontend."""
     lang = session.get('lang', 'hy')
 
-    # 1. Pick a target key (e.g., 'icon_car')
     keys = list(ICONS.keys())
     target_key = random.choice(keys)
     target_class = ICONS[target_key]
 
-    # 2. Get target translation
     target_name = TRANSLATIONS.get(lang, {}).get(target_key, "Icon")
 
     # 3. Generate Grid (3x3 = 9 items)
@@ -92,10 +120,9 @@ def start_process():
         if not raw:
             return jsonify({"error": "No JSON data received"}), 400
 
-        # --- ICON CAPTCHA CHECK ---
         user_selection = raw.get("captcha_selection", [])
         real_solution = session.get("captcha_solution")
-        session.pop("captcha_solution", None)  # One-time use
+        session.pop("captcha_solution", None)
 
         if not real_solution or not user_selection:
             return jsonify({"error": "CAPTCHA_FAIL"}), 400
