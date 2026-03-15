@@ -13,4 +13,4 @@ class Config:
 
     RATELIMIT_STORAGE_URI = "memory://"
     RATELIMIT_STRATEGY = "fixed-window"
-    RATELIMIT_DEFAULT = "2000 per day"
+    RATELIMIT_DEFAULT = "2000 per day" # not used in code
